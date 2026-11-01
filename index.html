@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#123b32">
+<link rel="manifest" href="./manifest.webmanifest">
+<title>MNM Business Hub</title>
+<style>
+:root{--green:#123b32;--green2:#1e6b54;--bg:#f3f6f4;--card:#fff;--muted:#64746d;--red:#b42318;--gold:#b7791f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#17231e;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+header{background:var(--green);color:white;padding:20px 16px 16px}header h1{font-size:23px;margin:0 0 5px}header p{margin:0;color:#d9eee5;font-size:13px}
+nav{display:flex;gap:7px;overflow:auto;padding:10px;background:#fff;position:sticky;top:0;z-index:3;box-shadow:0 2px 8px #0001}
+nav button{white-space:nowrap;border:0;background:#e9f1ed;padding:10px 12px;border-radius:10px;color:#173d31;font-weight:600}
+nav button.active{background:var(--green);color:#fff}
+main{padding:14px;max-width:900px;margin:auto}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{background:var(--card);padding:14px;border-radius:14px;box-shadow:0 2px 8px #123b320d;margin-bottom:12px}.stat{font-size:12px;color:var(--muted)}.num{font-size:22px;font-weight:750;margin-top:5px;overflow-wrap:anywhere}.green{color:var(--green2)}.red{color:var(--red)}h2{font-size:18px;margin:4px 0 12px}h3{font-size:15px;margin:0 0 10px}
+label{display:block;font-size:13px;font-weight:650;margin:10px 0 5px}input,select,textarea{width:100%;padding:11px;border:1px solid #ccd8d1;border-radius:9px;background:white;font:inherit;font-size:15px}textarea{min-height:65px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button.primary,.btn{border:0;border-radius:10px;background:var(--green2);color:#fff;padding:11px 14px;font-size:14px;font-weight:700;cursor:pointer}.secondary{background:#e9f1ed!important;color:var(--green)!important}.danger{background:#fff0ef!important;color:var(--red)!important}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.item{border:1px solid #e1e9e4;border-radius:11px;padding:12px;margin:9px 0;background:#fff}.itemtop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.small{font-size:12px;color:var(--muted);line-height:1.5}.pill{display:inline-block;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:700;background:#e8f4ed;color:#17623e}.pill.due{background:#fff0e0;color:#8a4b08}.pill.late{background:#ffe8e7;color:#a21c16}.hidden{display:none!important}.notice{padding:10px;border-radius:10px;background:#fff8df;color:#6e5100;font-size:13px;line-height:1.5;margin-bottom:12px}.empty{color:var(--muted);text-align:center;padding:22px}.divider{border:0;border-top:1px solid #e5ebe7;margin:14px 0}
+@media(min-width:650px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.layout{display:grid;grid-template-columns:1fr 1fr;gap:12px}}
+@media print{header,nav,.no-print,button{display:none!important}.page.hidden{display:none!important}body{background:white}.card,.item{box-shadow:none;break-inside:avoid}main{max-width:none;padding:0}}
+</style>
+</head>
+<body>
+<header><h1>MNM Business Hub</h1><p>রড • বালু • সিমেন্ট • ইট | ব্যবসার হিসাব</p></header>
+<nav id="nav">
+<button class="active" data-page="home">ড্যাশবোর্ড</button><button data-page="customers">কাস্টমার</button><button data-page="entry">নতুন হিসাব</button><button data-page="ledger">লেনদেন</button><button data-page="history">হিস্টরি</button><button data-page="reminders">রিমাইন্ডার</button><button data-page="settings">সেটিংস / ব্যাকআপ</button>
+</nav>
+<main>
+<section id="home" class="page">
+<div id="reminderBanner"></div>
+<div class="grid">
+<div class="card"><div class="stat">মোট বাকি পাওনা</div><div class="num red" id="totalDue">৳0</div></div>
+<div class="card"><div class="stat">মোট জমা</div><div class="num green" id="totalPaid">৳0</div></div>
+<div class="card"><div class="stat">কাস্টমার</div><div class="num" id="totalCustomers">0</div></div>
+<div class="card"><div class="stat">বাকি থাকা কাস্টমার</div><div class="num" id="owingCustomers">0</div></div>
+</div>
+<div class="card"><h2>সাম্প্রতিক হিসাব</h2><div id="recent"></div></div>
+<div class="notice">এই সংস্করণে তথ্য এই ব্রাউজার/ডিভাইসেই সেভ হয়। অন্য ডিভাইসের সঙ্গে অটোমেটিক সিঙ্ক হয় না। নিয়মিত ব্যাকআপ ডাউনলোড করুন।</div>
+</section>
+
+<section id="customers" class="page hidden">
+<div class="card"><h2>কাস্টমার যোগ করুন</h2><form id="customerForm">
+<label>কাস্টমারের নাম *</label><input id="cName" required>
+<div class="row"><div><label>মোবাইল</label><input id="cPhone" inputmode="tel"></div><div><label>ঠিকানা</label><input id="cAddress"></div></div>
+<label>নোট</label><textarea id="cNote"></textarea><div class="actions"><button class="primary">কাস্টমার সেভ করুন</button></div>
+</form></div>
+<div class="card"><h2>কাস্টমার তালিকা</h2><input id="customerSearch" placeholder="নাম বা মোবাইল দিয়ে খুঁজুন"><div id="customerList"></div></div>
+</section>
+
+<section id="entry" class="page hidden">
+<div class="card"><h2>নতুন লেনদেন লিখুন</h2><form id="txForm">
+<label>কাস্টমার *</label><select id="txCustomer" required></select>
+<div class="row"><div><label>লেনদেনের ধরন</label><select id="txType"><option value="sale">বাকি বিক্রি (+ পাওনা)</option><option value="payment">টাকা জমা (− পাওনা)</option><option value="adjust">সমন্বয় / ফেরত</option></select></div><div><label>পরিমাণ (৳) *</label><input id="txAmount" type="number" min="0.01" step="0.01" required></div></div>
+<div class="row"><div><label>তারিখ</label><input id="txDate" type="date" required></div><div><label>বাকি দেওয়ার শেষ তারিখ (ঐচ্ছিক)</label><input id="txDueDate" type="date"></div></div>
+<label>বিস্তারিত / পণ্যের নাম</label><textarea id="txNote" placeholder="যেমন: ১০ বস্তা সিমেন্ট"></textarea>
+<div class="actions"><button class="primary">লেনদেন সেভ করুন</button></div></form>
+<p class="small">টাকা জমা লিখলে পাওনা কমবে। বাকি বিক্রি লিখলে পাওনা বাড়বে। সমন্বয়/ফেরতের অঙ্ক পজিটিভ হলে পাওনা কমবে, নেগেটিভ হলে বাড়বে।</p></div>
+</section>
+
+<section id="ledger" class="page hidden">
+<div class="card"><h2>লেনদেনের খাতা</h2><div class="row"><div><label>কাস্টমার ফিল্টার</label><select id="ledgerCustomer"></select></div><div><label>মাস/তারিখ (ঐচ্ছিক)</label><input id="ledgerDate" type="month"></div></div>
+<div class="actions no-print"><button class="secondary" id="printLedger">প্রিন্ট / PDF</button></div><div id="ledgerList"></div></div>
+</section>
+
+<section id="history" class="page hidden">
+<div class="card"><h2>লেনদেনের হিস্টরি</h2>
+<p class="small">এখানে সব লেনদেনের তারিখ, কাস্টমার, ধরন ও টাকার পরিমাণ দেখা যাবে। বাতিল করা লেনদেনও আলাদা চিহ্নসহ থাকবে।</p>
+<div class="row"><div><label>কাস্টমার</label><select id="historyCustomer"></select></div><div><label>লেনদেনের ধরন</label><select id="historyType"><option value="">সব ধরনের</option><option value="sale">বাকি বিক্রি</option><option value="payment">টাকা জমা</option><option value="adjust">সমন্বয় / ফেরত</option></select></div></div>
+<div class="row"><div><label>শুরুর তারিখ</label><input id="historyFrom" type="date"></div><div><label>শেষ তারিখ</label><input id="historyTo" type="date"></div></div>
+<label>নাম / বিস্তারিত খুঁজুন</label><input id="historySearch" placeholder="কাস্টমারের নাম বা লেনদেনের নোট">
+<div class="grid" style="margin-top:12px">
+<div class="card"><div class="stat">ফিল্টারের মোট লেনদেন</div><div class="num" id="historyCount">0</div></div>
+<div class="card"><div class="stat">মোট বাকি বিক্রি</div><div class="num red" id="historySales">৳0</div></div>
+<div class="card"><div class="stat">মোট টাকা জমা</div><div class="num green" id="historyPayments">৳0</div></div>
+<div class="card"><div class="stat">নেট পাওনার পরিবর্তন</div><div class="num" id="historyNet">৳0</div></div>
+</div>
+<div class="actions no-print"><button class="secondary" id="historyCsvBtn">এই হিস্টরি CSV ডাউনলোড</button><button class="secondary" id="historyPrintBtn">হিস্টরি প্রিন্ট / PDF</button></div>
+<div id="historyList"></div></div>
+</section>
+
+<section id="reminders" class="page hidden">
+<div class="card"><h2>বাকি আদায়ের রিমাইন্ডার</h2><p class="small">অ্যাপ খোলা হলে সময়সীমা পার হওয়া বা সামনে থাকা বাকি দেখাবে। অ্যাপ বন্ধ থাকলে নোটিফিকেশন পাঠাবে না।</p><div id="reminderList"></div></div>
+</section>
+
+<section id="settings" class="page hidden">
+<div class="card"><h2>সেটিংস</h2><label>ব্যবসার নাম</label><input id="businessName" value="MNM Business Hub"><div class="actions"><button class="primary" id="saveSettings">সেটিংস সেভ</button></div><hr class="divider">
+<h3>ব্যাকআপ / পুনরুদ্ধার</h3><p class="small">ব্যাকআপ ফাইলে কাস্টমার ও লেনদেনের তথ্য থাকবে। ফাইলটি নিরাপদে রাখুন।</p>
+<div class="actions"><button class="primary" id="backupBtn">Backup Download (JSON)</button><button class="secondary" id="csvBtn">লেনদেন CSV</button><button class="secondary" id="printAllBtn">রিপোর্ট প্রিন্ট / PDF</button></div>
+<label>ব্যাকআপ ফাইল থেকে ফিরিয়ে আনুন</label><input type="file" id="restoreFile" accept=".json,application/json"><div class="actions"><button class="secondary" id="restoreBtn">ব্যাকআপ Restore</button></div>
+<hr class="divider"><h3>ডেটা মুছে ফেলা</h3><p class="small">ভুল লেনদেন স্থায়ীভাবে মুছলে হিসাবের ইতিহাস হারাতে পারে। সম্ভব হলে আগে ব্যাকআপ নিন।</p>
+<div class="actions"><button class="danger" id="clearBtn">সব ডেটা মুছুন</button></div></div>
+<div class="notice">বিনামূল্যের সীমাবদ্ধতা: এটি এক ডিভাইস/এক ব্রাউজারের লোকাল অ্যাপ। নাদির ও মহিনের আলাদা লগইন, অনলাইন সিঙ্ক ও সার্ভার-ভিত্তিক নিরাপত্তা এই ফাইলে নেই।</div>
+</section>
+</main>
+<script>
+const KEY='mnm_business_hub_free_v3';
+const blank=()=>({customers:[],transactions:[],settings:{businessName:'MNM Business Hub'},audit:[]});
+let db;
+try{db=JSON.parse(localStorage.getItem(KEY))||blank()}catch(e){db=blank()}
+function save(){localStorage.setItem(KEY,JSON.stringify(db));render()}
+function money(n){return '৳'+Number(n||0).toLocaleString('en-BD',{maximumFractionDigits:2})}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function dateToday(){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)}
+document.getElementById('txDate').value=dateToday();
+txType.addEventListener('change',()=>{txAmount.min=txType.value==='adjust'?'-999999999':'0.01';txAmount.placeholder=txType.value==='adjust'?'কমাতে পজিটিভ, বাড়াতে নেগেটিভ অঙ্ক':'টাকার পরিমাণ';});
+function customerName(id){return db.customers.find(c=>c.id===id)?.name||'মুছে ফেলা কাস্টমার'}
+function balance(id){return db.transactions.filter(t=>t.customerId===id&&!t.voided).reduce((s,t)=>s+Number(t.amount)*(t.type==='sale'?1:t.type==='payment'?-1:-1),0)}
+function txLabel(t){return t.type==='sale'?'বাকি বিক্রি':t.type==='payment'?'টাকা জমা':'সমন্বয় / ফেরত'}
+function txEffect(t){return Number(t.amount)*(t.type==='sale'?1:-1)}
+function log(action,detail){db.audit.push({at:new Date().toISOString(),action,detail})}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.page').forEach(p=>p.classList.toggle('hidden',p.id!==b.dataset.page));render()});
+document.getElementById('customerForm').onsubmit=e=>{e.preventDefault();let c={id:uid(),name:cName.value.trim(),phone:cPhone.value.trim(),address:cAddress.value.trim(),note:cNote.value.trim(),createdAt:new Date().toISOString()};db.customers.push(c);log('customer_add',c.name);e.target.reset();save();alert('কাস্টমার সেভ হয়েছে')};
+document.getElementById('txForm').onsubmit=e=>{e.preventDefault();if(!db.customers.length)return alert('আগে একজন কাস্টমার যোগ করুন');let t={id:uid(),customerId:txCustomer.value,type:txType.value,amount:Number(txAmount.value),date:txDate.value||dateToday(),dueDate:txDueDate.value,note:txNote.value.trim(),createdAt:new Date().toISOString(),voided:false};if(!t.customerId)return alert('কাস্টমার নির্বাচন করুন');db.transactions.push(t);log('transaction_add',`${customerName(t.customerId)} ${txLabel(t)} ${t.amount}`);e.target.reset();txDate.value=dateToday();save();alert('লেনদেন সেভ হয়েছে')};
+customerSearch.oninput=renderCustomers;ledgerCustomer.onchange=renderLedger;ledgerDate.onchange=renderLedger;
+function renderCustomers(){let q=(customerSearch.value||'').toLowerCase();customerList.innerHTML='';let cs=db.customers.filter(c=>(c.name+' '+c.phone).toLowerCase().includes(q));if(!cs.length){customerList.innerHTML='<div class="empty">কোনো কাস্টমার নেই</div>';return}cs.forEach(c=>{let el=document.createElement('div');el.className='item';el.innerHTML=`<div class="itemtop"><div><b>${esc(c.name)}</b><div class="small">${esc(c.phone||'মোবাইল নেই')} · ${esc(c.address||'ঠিকানা নেই')}</div><div class="small">নোট: ${esc(c.note||'—')}</div></div><div style="text-align:right"><b class="${balance(c.id)>0?'red':'green'}">${money(balance(c.id))}</b><div class="small">বর্তমান বাকি</div></div></div><div class="actions no-print"><button class="secondary" data-ledger="${c.id}">খাতা দেখুন</button><button class="danger" data-delc="${c.id}">কাস্টমার মুছুন</button></div>`;customerList.appendChild(el)});customerList.querySelectorAll('[data-ledger]').forEach(b=>b.onclick=()=>{ledgerCustomer.value=b.dataset.ledger;nav.querySelector('[data-page=ledger]').click();renderLedger()});customerList.querySelectorAll('[data-delc]').forEach(b=>b.onclick=()=>{let id=b.dataset.delc;if(db.transactions.some(t=>t.customerId===id&&!t.voided)){alert('এই কাস্টমারের লেনদেন আছে। হিসাবের ইতিহাস রক্ষার জন্য আগে লেনদেনগুলো সমাধান করুন।');return}if(confirm('এই কাস্টমার মুছবেন?')){db.customers=db.customers.filter(c=>c.id!==id);log('customer_delete',id);save()}})}
+function renderSelects(){let options='<option value="">সব কাস্টমার</option>'+db.customers.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');ledgerCustomer.innerHTML=options;let old=txCustomer.value;txCustomer.innerHTML='<option value="">কাস্টমার নির্বাচন করুন</option>'+db.customers.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');if(db.customers.some(c=>c.id===old))txCustomer.value=old}
+function renderLedger(){if(!ledgerList)return;let cid=ledgerCustomer.value,month=ledgerDate.value;let arr=db.transactions.filter(t=>!t.voided&&(!cid||t.customerId===cid)&&(!month||t.date.startsWith(month))).sort((a,b)=>a.date.localeCompare(b.date)||a.createdAt.localeCompare(b.createdAt));if(!arr.length){ledgerList.innerHTML='<div class="empty">এখনো কোনো লেনদেন নেই</div>';return}let running=0;ledgerList.innerHTML=arr.map(t=>{let eff=txEffect(t);running+=eff;let deadline=t.dueDate?` · শেষ তারিখ: ${t.dueDate}`:'';return `<div class="item"><div class="itemtop"><div><b>${esc(customerName(t.customerId))}</b><div class="small">${esc(t.date)} · ${txLabel(t)}${deadline}</div><div class="small">${esc(t.note||'')}</div></div><div style="text-align:right"><b class="${eff>0?'red':'green'}">${eff>0?'+':''}${money(eff)}</b><div class="small">চলতি হিসাব: ${money(running)}</div></div></div><div class="actions no-print"><button class="danger" data-void="${t.id}">ভুল হলে বাতিল করুন</button></div></div>`}).join('');ledgerList.querySelectorAll('[data-void]').forEach(b=>b.onclick=()=>{if(confirm('এই লেনদেন বাতিল করবেন? বাতিলের রেকর্ড রাখা হবে।')){let t=db.transactions.find(x=>x.id===b.dataset.void);t.voided=true;log('transaction_void',`${t.id} ${customerName(t.customerId)} ${t.amount}`);save()}})}
+function getReminders(){let today=dateToday();return db.transactions.filter(t=>!t.voided&&t.type==='sale'&&t.dueDate&&balance(t.customerId)>0).filter(t=>t.dueDate<=today).sort((a,b)=>a.dueDate.localeCompare(b.dueDate))}
+function renderReminders(){let arr=getReminders();reminderList.innerHTML=arr.length?arr.map(t=>`<div class="item"><div class="itemtop"><div><b>${esc(customerName(t.customerId))}</b><div class="small">শেষ তারিখ: ${esc(t.dueDate)} · ${esc(t.note||'বাকি বিক্রি')}</div></div><span class="pill ${t.dueDate<dateToday()?'late':'due'}">${t.dueDate<dateToday()?'সময় পার হয়েছে':'আজ পরিশোধের তারিখ'}</span></div><b class="red">${money(balance(t.customerId))}</b> <span class="small">কাস্টমারের মোট বাকি</span></div>`).join(''):'<div class="empty">এখন কোনো সময়সীমা-পার হওয়া বাকি নেই।</div>';let count=arr.length;reminderBanner.innerHTML=count?`<div class="notice">🔔 ${count}টি বাকি আদায়ের রিমাইন্ডার আছে। <button class="secondary" onclick="nav.querySelector('[data-page=reminders]').click()">দেখুন</button></div>`:''}
+
+function renderHistorySelect(){
+ if(!historyCustomer)return;
+ let old=historyCustomer.value;
+ historyCustomer.innerHTML='<option value="">সব কাস্টমার</option>'+db.customers.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+ if(db.customers.some(c=>c.id===old))historyCustomer.value=old;
+}
+function filteredHistory(){
+ let cid=historyCustomer.value, typ=historyType.value, from=historyFrom.value, to=historyTo.value, q=(historySearch.value||'').toLowerCase().trim();
+ return db.transactions.filter(t=>{
+   if(cid&&t.customerId!==cid)return false;
+   if(typ&&t.type!==typ)return false;
+   if(from&&t.date<from)return false;
+   if(to&&t.date>to)return false;
+   if(q&&!(customerName(t.customerId)+' '+(t.note||'')+' '+txLabel(t)).toLowerCase().includes(q))return false;
+   return true;
+ }).sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.createdAt||'').localeCompare(a.createdAt||''));
+}
+function renderHistory(){
+ if(!historyList)return;
+ renderHistorySelect();
+ const arr=filteredHistory();
+ const active=arr.filter(t=>!t.voided);
+ const sales=active.filter(t=>t.type==='sale').reduce((s,t)=>s+Number(t.amount),0);
+ const payments=active.filter(t=>t.type==='payment').reduce((s,t)=>s+Number(t.amount),0);
+ const net=active.reduce((s,t)=>s+txEffect(t),0);
+ historyCount.textContent=arr.length;
+ historySales.textContent=money(sales);
+ historyPayments.textContent=money(payments);
+ historyNet.textContent=(net>0?'+':'')+money(net);
+ historyList.innerHTML=arr.length?arr.map(t=>{
+   const effect=txEffect(t);
+   return `<div class="item"><div class="itemtop"><div><b>${esc(customerName(t.customerId))}</b><div class="small">${esc(t.date)} · ${txLabel(t)}</div><div class="small">${esc(t.note||'বিস্তারিত নেই')}${t.dueDate?' · বাকি দেওয়ার শেষ তারিখ: '+esc(t.dueDate):''}</div></div><div style="text-align:right"><b class="${effect>0?'red':'green'}">${effect>0?'+':''}${money(effect)}</b><div class="small">${t.voided?'<span class="pill late">বাতিল</span>':'<span class="pill">কার্যকর</span>'}</div></div></div></div>`;
+ }).join(''):'<div class="empty">এই ফিল্টারে কোনো লেনদেন পাওয়া যায়নি</div>';
+}
+[historyCustomer,historyType,historyFrom,historyTo,historySearch].forEach(el=>el.addEventListener('input',renderHistory));
+historyCsvBtn.onclick=()=>{
+ const arr=filteredHistory();
+ const rows=[['Date','Customer','Type','Amount','Balance effect','Due date','Note','Status'],...arr.map(t=>[t.date,customerName(t.customerId),txLabel(t),t.amount,txEffect(t),t.dueDate||'',t.note||'',t.voided?'Cancelled':'Active'])];
+ const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+ downloadBlob(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}),'MNM_Transaction_History_'+dateToday()+'.csv');
+};
+historyPrintBtn.onclick=()=>window.print();
+
+function render(){document.title=(db.settings.businessName||'MNM Business Hub');document.querySelector('header h1').textContent=db.settings.businessName||'MNM Business Hub';let active=db.transactions.filter(t=>!t.voided);totalDue.textContent=money(db.customers.reduce((s,c)=>s+Math.max(0,balance(c.id)),0));totalPaid.textContent=money(active.filter(t=>t.type==='payment').reduce((s,t)=>s+t.amount,0));totalCustomers.textContent=db.customers.length;owingCustomers.textContent=db.customers.filter(c=>balance(c.id)>0).length;renderSelects();renderCustomers();renderLedger();renderHistory();renderReminders();let rec=active.slice().sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).slice(0,5);recent.innerHTML=rec.length?rec.map(t=>`<div class="item"><b>${esc(customerName(t.customerId))}</b><div class="small">${esc(t.date)} · ${txLabel(t)}</div><b class="${txEffect(t)>0?'red':'green'}">${money(Math.abs(txEffect(t)))}</b></div>`).join(''):'<div class="empty">এখনো কোনো হিসাব যোগ করা হয়নি</div>';businessName.value=db.settings.businessName||'MNM Business Hub'}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+saveSettings.onclick=()=>{db.settings.businessName=businessName.value.trim()||'MNM Business Hub';log('settings_update','business name');save();alert('সেটিংস সেভ হয়েছে')};
+backupBtn.onclick=()=>{let blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});downloadBlob(blob,'MNM_Business_Hub_Backup_'+dateToday()+'.json')};
+csvBtn.onclick=()=>{let rows=[['Date','Customer','Type','Amount','Due date','Note','Status'],...db.transactions.map(t=>[t.date,customerName(t.customerId),txLabel(t),t.amount,t.dueDate||'',t.note||'',t.voided?'Cancelled':'Active'])];let csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');downloadBlob(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}),'MNM_Ledger_'+dateToday()+'.csv')};
+function downloadBlob(blob,name){let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}
+restoreBtn.onclick=async()=>{let f=restoreFile.files[0];if(!f)return alert('আগে JSON ব্যাকআপ ফাইল নির্বাচন করুন');try{let d=JSON.parse(await f.text());if(!Array.isArray(d.customers)||!Array.isArray(d.transactions))throw Error();if(confirm('বর্তমান ডেটা ব্যাকআপ দিয়ে প্রতিস্থাপন করবেন? আগে বর্তমান ডেটার ব্যাকআপ নিন।')){db=d;save();alert('ব্যাকআপ Restore হয়েছে')}}catch(e){alert('ব্যাকআপ ফাইলটি সঠিক নয়')}}
+clearBtn.onclick=()=>{if(confirm('সতর্কতা: সব কাস্টমার ও লেনদেন মুছে যাবে। এগোবেন?')&&confirm('শেষবার নিশ্চিত করুন—আপনার কাছে ব্যাকআপ আছে?')){db=blank();save();alert('ডেটা মুছে ফেলা হয়েছে')}};
+printLedger.onclick=()=>window.print();printAllBtn.onclick=()=>{nav.querySelector('[data-page=home]').click();window.print()};
+render();
+// Installable/offline support works after HTTPS hosting. Local file preview does not support service workers.
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {})); }
+</script>
+</body></html>
